@@ -269,7 +269,14 @@ fn main() {
                     if let Some(mountpoint) = env::args_os().nth(2) {
                         fuse::mount(RedoxFS {
                             fs: filesystem
-                        }, &mountpoint, &[]);
+                        }, &mountpoint, &[
+                            // One of the uses of this redoxfs fuse wrapper is to populate a filesystem
+                            // while building the Redox OS kernel. This means that we need to write on
+                            // a filesystem that belongs to `root`, which in turn means that we need to
+                            // be `root`, thus that we need to allow `root` to have access.
+                            OsStr::new("-o"),
+                            OsStr::new("allow_root"),
+                        ]);
                     } else {
                         println!("redoxfs: no mount point provided");
                     }
